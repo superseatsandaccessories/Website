@@ -122,6 +122,20 @@ dialog::backdrop{background:rgba(20,30,40,.55)}
 .df{padding:14px 18px 18px;display:grid;gap:10px}
 .df input{font:inherit;padding:10px 12px;border:var(--thick);border-radius:8px;background:var(--soft);color:var(--text);min-height:48px}
 .df .row{display:flex;gap:10px;flex-wrap:wrap}
+/* complete guard sets */
+.sc{background:var(--card);border:var(--thick);border-radius:12px;display:grid;grid-template-columns:auto 1fr minmax(190px,250px);gap:18px;align-items:center;padding:14px 18px}
+.sc.in{border-color:var(--red);box-shadow:0 0 0 3px var(--red)}
+.sc-img{display:flex;gap:6px;flex-wrap:wrap;max-width:260px}
+.sc-img .pi{width:68px;height:68px;border:1px solid var(--line)}
+.sc h3{font-size:22px;margin:6px 0 2px}
+.sc p{margin:0;color:var(--muted);font-size:16px;line-height:1.4}
+.sc .tag{display:inline-block}
+.sc-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.sc-tags .plate{font-size:14px;padding:3px 8px}
+.sc .ctl{padding:0;margin:0}
+.model .sc{margin-bottom:16px}
+@media (max-width:900px){.sc{grid-template-columns:1fr}.sc-img{max-width:none}}
+@media print{.sc{break-inside:avoid}}
 @media (max-width:900px){.top nav{display:none}.hero .wrap{grid-template-columns:1fr}.seal{width:150px;height:150px;justify-self:start;order:-1}.made,#contact .wrap{grid-template-columns:1fr 1fr}}
 @media (max-width:600px){.made,#contact .wrap{grid-template-columns:1fr}.brand{font-size:17px}.top .logo{width:48px;height:48px}.mh .pi{width:80px;height:80px}.bar .btn{display:none}}
 @media print{@page{size:A4;margin:10mm}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}.bar,.ob,.ctl,.top nav,.top .btn,.hero .btns,.ann{display:none!important}body::before{display:none}.tile{break-inside:avoid}.pgrid{grid-template-columns:repeat(3,1fr)}.hero .wrap{padding-bottom:32px}}
@@ -227,12 +241,21 @@ const save=()=>{try{localStorage.setItem('ss-order',JSON.stringify(order))}catch
 const step=q=>'<div class="step"><button type="button" data-a="-" aria-label="Decrease quantity">−</button><input type="number" min="0" inputmode="numeric" value="'+q+'" aria-label="Quantity"><button type="button" data-a="+" aria-label="Increase quantity">+</button></div>';
 const ctl=id=>order[id]?step(order[id].q):'<button type="button" class="btn add" data-a="add">Add to order</button>';
 const tile=(id,tag,code,label,imgs,type)=>'<article class="tile'+(order[id]?' in':'')+'" data-id="'+id+'" data-type="'+type+'" data-label="'+label+'"><div class="ph'+(imgs.length>1?' two':'')+'">'+imgs.map(s=>'<img src="'+s+'" alt="'+label+'" loading="lazy" decoding="async">').join('')+'</div><div class="tb"><span class="tag">'+tag+'</span>'+(code?'<b class="plate">'+code+'</b>':'<span class="nc">No code listed</span>')+'</div><div class="ctl">'+ctl(id)+'</div></article>';
+
+const typeSum=cs=>{const n={};cs.forEach(c=>n[c[0]]=(n[c[0]]||0)+1);return Object.keys(n).map(k=>k+(n[k]>1?' ×'+n[k]:'')).join(' + ')};
+const firstImg=code=>(IMG.codes[code]||[])[0];
+const setCard=(id,label,title,sub,imgs,tags,cls)=>'<article class="sc'+(cls||'')+(order[id]?' in':'')+'" data-id="'+id+'" data-label="'+label+'"><div class="sc-img">'+imgs+'</div><div><span class="tag">Complete set</span><h3>'+title+'</h3><p>'+sub+'</p>'+(tags?'<div class="sc-tags">'+tags+'</div>':'')+'</div><div class="ctl">'+ctl(id)+'</div></article>';
+const thumb=m=>'<div class="pi"><img src="'+IMG.thumbs[m[0]]+'" alt="'+m[1]+' '+m[2]+'" loading="lazy"></div>';
+const modelSet=m=>{const [id,b,n,cs]=m,codes=cs.map(c=>c[1]);
+ return setCard('SET-'+id,'Complete guard set – '+b+' '+n+' ('+codes.join(', ')+')','All guards for '+n,cs.length+' pieces: '+typeSum(cs),cs.map(c=>firstImg(c[1])?'<div class="pi"><img src="'+firstImg(c[1])+'" alt="'+c[0]+'" loading="lazy"></div>':'').join(''),codes.map(c=>'<b class="plate">'+c+'</b>').join(''))};
+const pieces=ms=>ms.reduce((n,m)=>n+m[3].length,0);
 $('#picks').innerHTML=M.map(m=>'<a href="#m-'+m[0]+'"><div class="pi"><img src="'+IMG.thumbs[m[0]]+'" alt="'+m[1]+' '+m[2]+'"></div>'+m[2]+'<span>'+m[1]+'</span></a>').join('');
 $('#models').innerHTML=M.map(m=>{const [id,b,n,cs]=m;
  const ts=cs.map(c=>tile(c[1],c[0],c[1],c[1]+' – '+b+' '+n+' '+c[0].toLowerCase(),IMG.codes[c[1]]||[],c[0])).join('')+tile('MAT-'+id,'Floor mat','','Floor mat – '+b+' '+n,[IMG.mats[id]],'Floor mat');
- return '<section class="model" id="m-'+id+'" data-brand="'+b+'" data-s="'+(b+' '+n).toLowerCase()+'"><div class="wrap"><div class="mh"><div class="pi"><img src="'+IMG.thumbs[id]+'" alt="'+b+' '+n+'"></div><div><p class="mb">'+b+'</p><h2>'+n+'</h2></div></div><div class="pgrid">'+ts+'</div></div></section>'}).join('');
+ return '<section class="model" id="m-'+id+'" data-brand="'+b+'" data-s="'+(b+' '+n).toLowerCase()+'"><div class="wrap"><div class="mh"><div class="pi"><img src="'+IMG.thumbs[id]+'" alt="'+b+' '+n+'"></div><div><p class="mb">'+b+'</p><h2>'+n+'</h2></div></div>'+modelSet(m)+'<div class="pgrid">'+ts+'</div></div></section>'}).join('');
 $('#oa').innerHTML=OA.map(o=>tile('OA-'+o[0],o[1],'OA-'+o[0],'OA-'+o[0]+' – '+o[1],[IMG.oa[o[0]]],'Accessory')).join('');
 $('#mades').innerHTML=MADE.map(m=>'<div class="card"><h3>'+m[0]+'</h3><p>'+m[1]+'</p><a class="enq" target="_blank" rel="noopener" href="'+wa('Hello, I would like to enquire about '+m[0].toLowerCase()+'.')+'">Ask on WhatsApp</a></div>').join('');
+
 const total=M.reduce((n,m)=>n+m[3].length,0)+OA.length;
 $('#stats').textContent=total+' product codes • '+M.length+' scooter models';
 $('#waBot').href=wa('Hello Super Seats and Accessories, I would like to enquire about your catalogue.');
@@ -240,7 +263,7 @@ let brand='All';const brands=['All',...new Set(M.map(m=>m[1]))];
 $('#brands').innerHTML=brands.map(b=>'<button class="chip" type="button" aria-pressed="'+(b===brand)+'">'+b+'</button>').join('');
 $('#brands').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;brand=b.textContent;[...$('#brands').children].forEach(c=>c.setAttribute('aria-pressed',c===b));filter()};
 function filter(){const q=$('#q').value.trim().toLowerCase(),t=$('#type').value;let n=0;
- $$('.model').forEach(s=>{const bo=brand==='All'||s.dataset.brand===brand,bm=!q||s.dataset.s.includes(q);let any=0;
+ $$('.model').forEach(s=>{const bo=brand==='All'||s.dataset.brand===brand,bm=!q||s.dataset.s.includes(q);let any=0;const sc=s.querySelector('.sc');if(sc)sc.hidden=!(bo&&!t&&bm);
   s.querySelectorAll('.tile').forEach(el=>{const ok=bo&&(!t||el.dataset.type===t)&&(bm||el.dataset.id.toLowerCase().includes(q));el.hidden=!ok;if(ok)any++});s.hidden=!any;n+=any});
  let oa=0;$$('#oa .tile').forEach(el=>{const ok=!t&&brand==='All'&&(!q||el.dataset.label.toLowerCase().includes(q));el.hidden=!ok;if(ok)oa++});
  $('#accessories').hidden=!oa;$('#none').hidden=n+oa>0}
@@ -253,14 +276,14 @@ function refresh(){const ids=Object.keys(order),u=ids.reduce((s,id)=>s+order[id]
  $('#dl').innerHTML=ids.map(id=>'<li data-id="'+id+'" data-label="'+order[id].label+'"><span>'+order[id].label+'</span>'+step(order[id].q)+'<button class="rm" type="button" data-a="rm" aria-label="Remove '+order[id].label+'">✕</button></li>').join('');
  $('#empty').hidden=ids.length>0;['#send','#copy','#clear'].forEach(s=>$(s).hidden=!ids.length);$('#send').href=wa(msg())}
 function setQ(id,label,q){if(q<=0)delete order[id];else order[id]={q:q,label:label};save();
- const t=document.querySelector('.tile[data-id="'+id+'"]');if(t){t.classList.toggle('in',!!order[id]);t.querySelector('.ctl').innerHTML=ctl(id)}refresh()}
+ document.querySelectorAll('.tile[data-id="'+id+'"],.sc[data-id="'+id+'"]').forEach(t=>{t.classList.toggle('in',!!order[id]);t.querySelector('.ctl').innerHTML=ctl(id)});refresh()}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const h=b.closest('[data-id]'),id=h.dataset.id,l=h.dataset.label,c=order[id]?order[id].q:0,a=b.dataset.a;
  setQ(id,l,a==='add'?1:a==='+'?c+1:a==='-'?c-1:0)});
 document.addEventListener('change',e=>{if(e.target.matches('.step input')){const h=e.target.closest('[data-id]');setQ(h.dataset.id,h.dataset.label,Math.max(0,parseInt(e.target.value)||0))}});
 const open=()=>{refresh();$('#panel').showModal()};
 $('#openTop').onclick=$('#openBar').onclick=open;$('#closeP').onclick=()=>$('#panel').close();
 $('#nm').oninput=()=>{$('#send').href=wa(msg())};
-$('#clear').onclick=()=>{order={};save();$$('.tile.in').forEach(t=>{t.classList.remove('in');t.querySelector('.ctl').innerHTML=ctl(t.dataset.id)});refresh()};
+$('#clear').onclick=()=>{order={};save();$$('.tile.in,.sc.in').forEach(t=>{t.classList.remove('in');t.querySelector('.ctl').innerHTML=ctl(t.dataset.id)});refresh()};
 $('#copy').onclick=async()=>{try{await navigator.clipboard.writeText(msg());$('#copy').textContent='Copied'}catch(e){$('#copy').textContent='Copy failed'}setTimeout(()=>$('#copy').textContent='Copy list',1800)};
 refresh();
 </script>

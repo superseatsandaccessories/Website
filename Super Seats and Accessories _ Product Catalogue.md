@@ -1,3 +1,5 @@
+Crash guards • Floor mats • Seat covers • Pune
+
 [Super Seats and Accessories](#top)
 
 [Scooter models](#models)[Accessories](#accessories)[About](#about)[Contact](#contact)
@@ -49,4 +51,4 @@ Send us the product codes and the quantity you need.
 Opp. Modern High School, Jangali Maharaj Rd, Shivajinagar, Pune, Maharashtra 411005\
 [Open in Maps](https://www.google.com/maps/search/?api=1&query=Super+Seats+and+Accessories+Jangali+Maharaj+Rd+Pune)
 
-© 2026 Super Seats and Accessories, Pune. Since 1990.
+© 2026 Super Seats and Accessories • Pune • Since 1990
